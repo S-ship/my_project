@@ -4,16 +4,16 @@
       <div class="avater_box">
         <img src="../assets/logo.png" alt="">
       </div>
-      <el-form label-width="0px" class="login_form" :model="loginform">
-          <el-form-item>
+      <el-form label-width="0px" class="login_form" ref="loginFormRef" :model="loginform" :rules="loginRules">
+          <el-form-item prop="username">
             <el-input prefix-icon="iconfont icon-users" v-model="loginform.username"></el-input>
           </el-form-item>
-          <el-form-item>
+          <el-form-item prop="password">
             <el-input type="password" prefix-icon="iconfont icon-3702mima" v-model="loginform.password"></el-input>
           </el-form-item>
           <el-form-item class="btns">
-            <el-button type="primary">登录</el-button>
-            <el-button>重置</el-button>
+            <el-button type="primary" @click="submitForm">登录</el-button>
+            <el-button @click="resetForm">重置</el-button>
           </el-form-item>
       </el-form>
     </div>
@@ -26,7 +26,33 @@ export default {
       loginform: {
         username: 'admin',
         password: '123455'
+      },
+      loginRules: {
+        username: [
+          { required: true, message: '请输入活动名称', trigger: 'blur' },
+          { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入活动名称', trigger: 'blur' },
+          { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
+        ]
       }
+    }
+  },
+  methods: {
+    submitForm () {
+      this.$refs.loginFormRef.validate(async valid => {
+        if (!valid) return
+        const { data: res } = await this.$http.post('login', this.loginform)
+        console.log(res)
+        if (res.meta.status !== 200) return this.$message.error('登录失败' + '' + res.meta.msg)
+        this.$message.success('登录成功')
+        window.sessionStorage.setItem('token', res.data.token)
+        this.$router.push('/home')
+      })
+    },
+    resetForm () {
+      this.$refs.loginFormRef.resetFields()
     }
   }
 }
