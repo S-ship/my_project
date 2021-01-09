@@ -25,15 +25,15 @@ export default {
     return {
       loginform: {
         username: 'admin',
-        password: '123455'
+        password: '123456'
       },
-      //用户名验证规则
+      // 用户名验证规则
       loginRules: {
         username: [
           { required: true, message: '请输入活动名称', trigger: 'blur' },
           { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
         ],
-        //密码验证规则
+        // 密码验证规则
         password: [
           { required: true, message: '请输入活动名称', trigger: 'blur' },
           { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
@@ -42,7 +42,7 @@ export default {
     }
   },
   methods: {
-    //给登录按钮添加校验
+    // 给登录按钮添加校验
     submitForm () {
       this.$refs.loginFormRef.validate(async valid => {
         if (!valid) return
@@ -54,7 +54,7 @@ export default {
         this.$router.push('/home')
       })
     },
-    //给重置按钮添加重置功能，这两个功能都要用到Vue提供的ref属性
+    // 给重置按钮添加重置功能，这两个功能都要用到Vue提供的ref属性
     resetForm () {
       this.$refs.loginFormRef.resetFields()
     }
