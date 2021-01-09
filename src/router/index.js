@@ -6,7 +6,6 @@ import '../assets/css/global.css'
 import axios from 'axios'
 import Home from '../components/home.vue'
 axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/v1/'
-//给Vue原型对象添加$http属性
 Vue.prototype.$http = axios
 Vue.use(VueRouter)
 
