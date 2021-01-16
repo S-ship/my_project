@@ -1,6 +1,5 @@
 <template>
 <div>
-    <h3>用户列表组件</h3>
     <!-- 面包屑导航 -->
     <el-breadcrumb>
         <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
@@ -11,7 +10,7 @@
     <el-card>
         <!-- 搜索与添加区域 -->
         <el-row :gutter="20">
-            <el-col :span="7">
+            <el-col :span="15">
                 <el-input placeholder="请输入内容" v-model="dataList.query" clearable :clear="getList">
                     <el-button slot="append" icon="el-icon-search" @click="getList"></el-button>
                 </el-input>
@@ -19,6 +18,7 @@
             <el-col :span="4">
                 <el-button type="primary" @click="addDialogVisible = true">添加用户</el-button>
             </el-col>
+            <el-col></el-col>
         </el-row>
         <el-table :data="userList" border stripe>
           <el-table-column label="#" type="index"></el-table-column>
@@ -33,9 +33,9 @@
           </el-table-column>
           <el-table-column label="操作" width="190px">
             <template slot-scope="scope">
-              <el-button type="primary" icon="el-icon-edit" size="mini" @click="editDialog(scope.row.id)"></el-button>
+            <el-button type="primary" icon="el-icon-edit" size="mini" @click="editDialog(scope.row.id)"></el-button>
             <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteSingleUser(scope.row.id)"></el-button>
-            <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+            <el-button type="warning" icon="el-icon-setting" size="mini" @click="userRole(scope.row)"></el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -90,6 +90,26 @@
         <el-button type="primary" @click="editUsers">确 定</el-button>
       </span>
     </el-dialog>
+    <el-dialog title="分配用户角色" :visible.sync="roleDialogVisible" @close="userRoleList">
+      <div>
+        <p>当前的用户: {{userInfo.username}}</p>
+        <p>当前的角色: {{userInfo.role_name}}</p>
+        <p>分配新角色:
+          <el-select v-model="value" placeholder="请选择">
+          <el-option
+            v-for="item in roleList"
+            :key="item.id"
+            :label="item.roleName"
+            :value="item.id">
+          </el-option>
+        </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="roleDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="confirmRole">确 定</el-button>
+      </span>
+    </el-dialog>
 </div>
 </template>
 <script>
@@ -119,9 +139,13 @@ export default {
         pagesize: 2
       },
       userList: [],
+      userInfo: {},
+      roleList: {},
+      value: '',
       total: 0,
       addDialogVisible: false,
       editDialogVisible: false,
+      roleDialogVisible: false,
       addForm: {
         username: '',
         password: '',
@@ -175,6 +199,7 @@ export default {
       if (res.meta.status !== 200) return this.$message.error('更新数据失败')
       this.userList = res.data.users
       this.total = res.data.total
+      this.userInfo = res.data
     },
     handleSizeChange (newSize) {
       this.dataList.pagesize = newSize
@@ -228,6 +253,26 @@ export default {
       const { data: res } = await this.$http.delete('users/' + id)
       if (res.meta.status !== 200) return this.$message.error('删除失败')
       this.getList()
+    },
+    async userRole (userInfo) {
+      this.userInfo = userInfo
+      // console.log(this.userInfo)
+      const { data: res } = await this.$http.get('roles')
+      if (res.meta.status !== 200) return this.$message.error('获取角色列表失败')
+      this.roleList = res.data
+      // console.log(this.roleList)
+      this.roleDialogVisible = true
+    },
+    async confirmRole () {
+      if (!this.value) this.$message.error('请选择用户角色')
+      const { data: res } = await this.$http.put(`users/${this.userInfo.id}/role`, { rid: this.value })
+      if (res.meta.status !== 200) return this.$message.error('分配角色失败')
+      this.$message.success('分配角色成功')
+      this.getList()
+      this.roleDialogVisible = false
+    },
+    userRoleList () {
+      this.value = ''
     }
   }
 }
